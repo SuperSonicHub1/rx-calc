@@ -58,10 +58,10 @@ Kyle
 	* ternary conditions
 	* formatted strings
 * ~Nicer error handling~
-* Use `readline` instead of `input`
-	* History!
-	* Go backwards in input!
-	* Autocomplete
+* ~Use `readline` instead of `input`~
+	* ~History!~
+	* ~Go backwards in input!~
+	* ~Autocomplete~
 * Make certain variables (`inf`) constant
 * Figure out how to expose Python standard library
 	* most builtins

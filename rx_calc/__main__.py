@@ -1,7 +1,7 @@
 from ast import (
 	parse,
 
-	
+
 	Assign,
 	AnnAssign,
 	Expr,
@@ -10,12 +10,36 @@ from ast import (
 )
 from decimal import Decimal
 from traceback import print_exception
+import readline
 from typing import Dict, Any
-from .resolve import resolve_value
 
 from .exception import RxException
-from .variable import Variable
+from .resolve import resolve_value
 from .rx_variable import RxVariable
+from .variable import Variable
+
+# Line editing and autocompletion
+# python -c "import rlcompleter, readline; print(readline.get_completer_delims())"
+completer_delims = ' \t\n`~!@#$%^&*()-=+[{]}\\|;:\'",<>/?'
+readline.set_completer_delims(completer_delims)
+
+variable_index = 0
+
+def completer(text, state):
+	if state == 0:
+		variable_index = 0
+
+	variable_names = list(variables.keys())
+	while variable_index < len(variable_names):
+		variable_name = variable_names[variable_index]
+		variable_index += 1
+		if len(text) > 0 and variable_name.startswith(text):
+			return variable_name
+
+	return None
+
+readline.set_completer(completer)
+readline.parse_and_bind("tab: complete")
 
 variables: Dict[str, Variable] = {
 	'inf': Variable('inf', Decimal('Infinity'))
