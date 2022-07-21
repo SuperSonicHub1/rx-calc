@@ -2,8 +2,11 @@ from ast import (
 	parse,
 
 
+	AST,
 	Assign,
+	AugAssign,
 	AnnAssign,
+	BinOp,
 	Expr,
 	Module,
 	Name,
@@ -47,6 +50,43 @@ variables: Dict[str, Variable] = {
 
 stmt_index = 0
 
+def handle_statement(statement: AST):
+	if type(statement) == Assign:
+		assert len(statement.targets) == 1
+		target = statement.targets[0]
+		assert isinstance(target, Name)
+		value = resolve_value(variables, statement.value)
+		if target.id in variables:
+			variables[target.id].value = value
+		else:
+			variables[target.id] = Variable(target.id, value)
+		print(variables[target.id])
+	elif type(statement) == AnnAssign:
+		target = statement.target
+		assert isinstance(target, Name)
+		variables[target.id] = RxVariable(target.id, statement.annotation, variables)
+		print(variables[target.id])
+	elif type(statement) == Expr:
+		print(resolve_value(variables, statement.value))
+	elif type(statement) == AugAssign:
+		target = statement.target
+		assert isinstance(target, Name)
+		if target.id in variables:
+			handle_statement(
+				Assign(
+					targets=[target],
+					value=BinOp(
+						left=target,
+						op=statement.op,
+						right=statement.value
+					)
+				)
+			)
+		else:
+			raise RxException(f"Variable does not exist: {target.id}")
+	else:
+		raise RxException(f"Unsupported statement type: statement")
+
 while True:
 	try:
 		command = input("> ").strip()
@@ -57,26 +97,7 @@ while True:
 
 		module: Module = parse(command, f"stmt_{stmt_index}")
 		for statement in module.body:
-			if type(statement) == Assign:
-				assert len(statement.targets) == 1
-				target = statement.targets[0]
-				assert isinstance(target, Name)
-				value = resolve_value(variables, statement.value)
-				if target.id in variables:
-					variables[target.id].value = value
-				else:
-					variables[target.id] = Variable(target.id, value)
-				print(variables[target.id])
-			elif type(statement) == AnnAssign:
-				target = statement.target
-				assert isinstance(target, Name)
-				variables[target.id] = RxVariable(target.id, statement.annotation, variables)
-				print(variables[target.id])
-			elif type(statement) == Expr:
-				print(resolve_value(variables, statement.value))
-			# TODO: elif type(statement) == AugAssign
-			else:
-				raise RxException("Unsupported statement type: ", statement)
+			handle_statement(statement)
 	except Exception as e:
 		# TODO: Better printing of SyntaxErrors
 		if isinstance(e, RxException):
