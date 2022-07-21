@@ -52,7 +52,7 @@ Kyle
 ## TODO
 
 * Support a whole lot more Python nodes
-	* unary ops
+	* ~unary ops~
 	* function calls 
 	* sequences
 	* ternary conditions

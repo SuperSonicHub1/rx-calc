@@ -16,7 +16,12 @@ from ast import (
 	Add,
 	BinOp,
 	Constant,
-	Name
+	Name,
+	UAdd,
+	USub,
+	Not,
+	Invert,
+	UnaryOp,
 )
 from decimal import Decimal
 import operator
@@ -24,7 +29,7 @@ from typing import Any, Dict
 from .exception import RxException
 from .variable import Variable
 
-operator_to_function = {
+binary_operator_to_function = {
 	Add: operator.add,
 	Sub: operator.sub,
 	Mult: operator.mul,
@@ -40,6 +45,13 @@ operator_to_function = {
 	MatMult: operator.matmul,
 }
 
+unary_operator_to_function = {
+	UAdd: operator.pos,
+	USub: operator.neg,
+	Not: operator.not_,
+	Invert: operator.invert,
+}
+
 def resolve_value(variables: Dict[str, Variable], value: AST) -> Any:
 	if type(value) == Constant:
 		value_value = value.value
@@ -53,9 +65,13 @@ def resolve_value(variables: Dict[str, Variable], value: AST) -> Any:
 		else:
 			raise RxException(f"Variable does not exist: {value.id}", )
 	elif type(value) == BinOp:
-		return operator_to_function[type(value.op)](
+		return binary_operator_to_function[type(value.op)](
 			resolve_value(variables, value.left),
 			resolve_value(variables, value.right)
+		)
+	elif type(value) == UnaryOp:
+		return unary_operator_to_function[type(value.op)](
+			resolve_value(variables, value.operand),
 		)
 	else:
 		raise RxException(f"Unsupported value type: {dump(value)}")
