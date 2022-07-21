@@ -1,4 +1,5 @@
 from ast import (
+	dump,
 	AST,
 	Sub,
 	Mult,
@@ -20,6 +21,7 @@ from ast import (
 from decimal import Decimal
 import operator
 from typing import Any, Dict
+from .exception import RxException
 from .variable import Variable
 
 operator_to_function = {
@@ -49,11 +51,11 @@ def resolve_value(variables: Dict[str, Variable], value: AST) -> Any:
 		if value.id in variables:
 			return variables[value.id].value
 		else:
-			raise Exception("Variable does not exist: ", value.id)
+			raise RxException(f"Variable does not exist: {value.id}", )
 	elif type(value) == BinOp:
 		return operator_to_function[type(value.op)](
 			resolve_value(variables, value.left),
 			resolve_value(variables, value.right)
 		)
 	else:
-		raise Exception("Unsupported value type: ", value)
+		raise RxException(f"Unsupported value type: {dump(value)}")

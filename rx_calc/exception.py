@@ -1,0 +1,2 @@
+class RxException(Exception):
+	pass

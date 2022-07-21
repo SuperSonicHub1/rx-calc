@@ -57,7 +57,7 @@ Kyle
 	* sequences
 	* ternary conditions
 	* formatted strings
-* Nicer error handling
+* ~Nicer error handling~
 * Use `readline` instead of `input`
 	* History!
 	* Go backwards in input!
